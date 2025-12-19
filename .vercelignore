@@ -1,0 +1,23 @@
+# Local development
+node_modules
+.next
+.env
+.env.local
+.env*.local
+
+# Database
+db/
+*.db
+*.db-journal
+
+# Logs
+*.log
+dev.log
+server.log
+
+# OS
+.DS_Store
+
+# IDE
+.vscode
+.idea
