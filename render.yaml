@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: hsit-calculator
+    env: node
+    plan: free
+    region: singapore
+    buildCommand: npm install && npm run db:generate && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: NEXTAUTH_URL
+        sync: false
