@@ -69,6 +69,14 @@ export default function HSITCalculator() {
   const onSubmit = async (data: FormData) => {
     setIsCalculating(true)
     setFormData(data)
+
+    // If user doesn't have HSIT plan, just show guidance without API call
+    if (!data.hasHSITPlan) {
+      setShowResults(true)
+      setIsCalculating(false)
+      return
+    }
+
     try {
       const response = await fetch("/api/calculate", {
         method: "POST",
