@@ -98,9 +98,16 @@ export default function HSITCalculator() {
             block: 'start'
           })
         }, 300)
+      } else {
+        // Handle non-200 responses
+        console.error("Calculation failed with status:", response.status)
+        const errorText = await response.text()
+        console.error("Error details:", errorText)
+        alert("Unable to calculate results. Please try again later.")
       }
     } catch (error) {
       console.error("Calculation error:", error)
+      alert("An error occurred while calculating. Please check your connection and try again.")
     } finally {
       setIsCalculating(false)
     }
