@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell, LabelList } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts'
 
 interface PremiumProjectionData {
   age: number
@@ -48,55 +48,67 @@ export function ResultsChart({
   const chartData = generateChartData()
 
   return (
-    <Card className="border-primary/10">
-      <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
-        <CardTitle className="text-primary">Premium Projection to Age 75</CardTitle>
+    <Card className="glass-card premium-shadow overflow-hidden">
+      <CardHeader className="bg-premium-gradient text-white">
+        <CardTitle className="text-lg">Premium Projection to Age 75</CardTitle>
       </CardHeader>
       <CardContent className="pt-6">
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+        <ResponsiveContainer width="100%" height={320}>
+          <LineChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
             <XAxis
               dataKey="age"
-              label={{ value: 'Age', position: 'insideBottom', offset: -5 }}
-              stroke="#6b7280"
+              label={{ value: 'Age', position: 'insideBottom', offset: -10, fontStyle: 'italic' }}
+              tick={{ fontSize: 12, fill: '#64748b' }}
+              axisLine={{ stroke: '#e2e8f0' }}
             />
             <YAxis
-              label={{ value: 'Monthly Premium (RM)', angle: -90, position: 'insideLeft' }}
-              stroke="#6b7280"
-              tickFormatter={(value) => `${value}`}
+              tickFormatter={(value) => value.toLocaleString()}
+              width={80}
+              label={{
+                value: 'Monthly Premium (RM)',
+                angle: -90,
+                position: 'insideLeft',
+                offset: -10,
+                style: { textAnchor: 'middle', fill: '#64748b', fontSize: 13, fontWeight: 500 }
+              }}
+              tick={{ fontSize: 12, fill: '#64748b' }}
+              axisLine={{ stroke: '#e2e8f0' }}
             />
             <Tooltip
+              contentStyle={{
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderRadius: '12px',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                backdropFilter: 'blur(4px)'
+              }}
               formatter={(value: number) => [`RM ${value.toLocaleString()}`, '']}
               labelFormatter={(label) => `Age ${label}`}
-              contentStyle={{
-                backgroundColor: '#fff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-              }}
+              itemStyle={{ fontWeight: 600 }}
             />
             <Legend
-              wrapperStyle={{ paddingTop: '20px' }}
-              iconType="line"
+              verticalAlign="top"
+              height={36}
+              wrapperStyle={{ paddingBottom: '20px' }}
             />
             <Line
               type="monotone"
               dataKey="lowInflation"
-              stroke="#f97316"
+              stroke="oklch(0.55 0.15 200)"
               strokeWidth={3}
+              dot={{ fill: 'oklch(0.55 0.15 200)', r: 4 }}
+              activeDot={{ r: 7, strokeWidth: 2, stroke: '#fff' }}
               name="Low Inflation (5%)"
-              dot={{ fill: '#f97316', r: 4 }}
-              activeDot={{ r: 6 }}
             />
             <Line
               type="monotone"
               dataKey="highInflation"
-              stroke="#dc2626"
+              stroke="oklch(0.55 0.18 243)"
               strokeWidth={3}
+              dot={{ fill: 'oklch(0.55 0.18 243)', r: 4 }}
+              activeDot={{ r: 7, strokeWidth: 2, stroke: '#fff' }}
               name="High Inflation (8%)"
-              dot={{ fill: '#dc2626', r: 4 }}
-              activeDot={{ r: 6 }}
             />
           </LineChart>
         </ResponsiveContainer>
@@ -116,87 +128,95 @@ export function SavingsBreakdown({
   yearlySavingsNeeded,
   projectedSavings
 }: SavingsBreakdownProps) {
-  const savingsData = [
-    {
-      category: 'Monthly Savings',
-      amount: Math.round(monthlySavingsNeeded),
-      fill: '#3b82f6'
-    },
-    {
-      category: 'Yearly Savings',
-      amount: Math.round(yearlySavingsNeeded),
-      fill: '#10b981'
-    },
-    {
-      category: 'Projected by Age 75',
-      amount: Math.round(projectedSavings),
-      fill: '#8b5cf6'
+  // Format currency with millions notation
+  const formatCurrency = (value: number) => {
+    if (value >= 1000000) {
+      return `RM ${(value / 1000000).toFixed(2)}M`
     }
-  ]
+    return `RM ${value.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  }
+
+  // Calculate percentages relative to projected savings (largest value)
+  const maxValue = projectedSavings
+  const monthlyPercent = (monthlySavingsNeeded / maxValue) * 100
+  const yearlyPercent = (yearlySavingsNeeded / maxValue) * 100
 
   return (
-    <Card className="border-primary/10 shadow-md">
-      <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 border-b border-primary/5 pb-4">
-        <CardTitle className="text-primary text-lg font-semibold flex items-center gap-2">
-          <span className="h-5 w-1 bg-primary rounded-full"></span>
-          Savings Breakdown
-        </CardTitle>
+    <Card className="glass-card premium-shadow overflow-hidden">
+      <CardHeader className="bg-premium-gradient text-white">
+        <CardTitle className="text-lg">Savings Breakdown</CardTitle>
       </CardHeader>
-      <CardContent className="pt-6">
-        <ResponsiveContainer width="100%" height={350}>
-          <BarChart
-            data={savingsData}
-            layout="vertical"
-            margin={{ top: 20, right: 120, left: 40, bottom: 20 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
-            <XAxis
-              type="number"
-              hide
-            />
-            <YAxis
-              dataKey="category"
-              type="category"
-              width={140}
-              tick={{ fill: '#4b5563', fontSize: 13, fontWeight: 500 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip
-              cursor={{ fill: 'rgba(0,0,0,0.04)' }}
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  const data = payload[0].payload;
-                  return (
-                    <div className="bg-white p-3 border border-gray-100 shadow-lg rounded-lg">
-                      <p className="font-semibold text-gray-700 mb-1">{data.category}</p>
-                      <p className="text-primary font-bold text-lg">
-                        RM {data.amount.toLocaleString()}
-                      </p>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Bar
-              dataKey="amount"
-              radius={6}
-              barSize={40}
-              background={{ fill: '#f3f4f6', radius: 6 }}
-            >
-              {savingsData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
-              <LabelList
-                dataKey="amount"
-                position="right"
-                formatter={(value: number) => `RM ${value.toLocaleString()}`}
-                style={{ fill: '#374151', fontSize: 13, fontWeight: 600 }}
-              />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+      <CardContent>
+        <div className="space-y-5">
+          {/* Monthly Savings */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-baseline">
+              <span className="text-sm font-medium text-gray-700">Monthly Savings Needed</span>
+              <span className="text-lg font-bold text-blue-600">{formatCurrency(monthlySavingsNeeded)}</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-7 relative overflow-hidden border border-gray-200">
+              <div
+                className="bg-gradient-to-r from-[#008BA1] to-[#005C6A] h-full flex items-center justify-end pr-2 transition-all duration-700 ease-out"
+                style={{ width: `${Math.max(monthlyPercent, 3)}%` }}
+              >
+                {monthlyPercent > 12 && (
+                  <span className="text-white text-xs font-semibold">{monthlyPercent.toFixed(1)}%</span>
+                )}
+              </div>
+              {monthlyPercent <= 12 && (
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600">
+                  {monthlyPercent.toFixed(1)}%
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Yearly Savings */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-baseline">
+              <span className="text-sm font-medium text-gray-700">Yearly Savings Needed</span>
+              <span className="text-lg font-bold text-green-600">{formatCurrency(yearlySavingsNeeded)}</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-7 relative overflow-hidden border border-gray-200">
+              <div
+                className="bg-gradient-to-r from-[#1E88E5] to-[#1565C0] h-full flex items-center justify-end pr-2 transition-all duration-700 ease-out"
+                style={{ width: `${Math.max(yearlyPercent, 3)}%` }}
+              >
+                {yearlyPercent > 12 && (
+                  <span className="text-white text-xs font-semibold">{yearlyPercent.toFixed(1)}%</span>
+                )}
+              </div>
+              {yearlyPercent <= 12 && (
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-semibold text-gray-600">
+                  {yearlyPercent.toFixed(1)}%
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Projected Savings */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-baseline">
+              <span className="text-sm font-medium text-gray-700">Projected by Age 75</span>
+              <span className="text-lg font-bold text-purple-600">{formatCurrency(projectedSavings)}</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-7 relative overflow-hidden border border-gray-200">
+              <div
+                className="gold-accent h-full flex items-center justify-end pr-2 transition-all duration-700 ease-out shadow-none"
+                style={{ width: '100%' }}
+              >
+                <span className="text-white text-xs font-bold">100%</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Info note */}
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+            <p className="text-xs text-blue-800 leading-relaxed">
+              <strong>Note:</strong> Percentages show relative comparison to projected savings. The projected amount is significantly larger due to compound growth over time.
+            </p>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

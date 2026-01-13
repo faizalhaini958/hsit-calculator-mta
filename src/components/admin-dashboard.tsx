@@ -17,7 +17,6 @@ interface AdminStats {
     averageAge: number;
     genderDistribution: { name: string; value: number }[];
     planCoverage: { name: string; value: number }[];
-    averageMonthlySavingsNeeded: number;
 }
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
@@ -66,7 +65,7 @@ export function AdminDashboard() {
 
     return (
         <div className="space-y-8">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">
@@ -90,21 +89,6 @@ export function AdminDashboard() {
                         </div>
                         <p className="text-xs text-muted-foreground">
                             Years old
-                        </p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                            Avg. Monthly Savings Needed
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            RM {stats.averageMonthlySavingsNeeded.toFixed(2)}
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                            Recommended monthly savings
                         </p>
                     </CardContent>
                 </Card>

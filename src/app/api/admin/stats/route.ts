@@ -25,12 +25,6 @@ export async function GET() {
       },
     });
 
-    const savingsAggregate = await prisma.hSITCalculatorResult.aggregate({
-      _avg: {
-        monthlySavingsNeeded: true
-      }
-    })
-
     return NextResponse.json({
       totalCalculations,
       averageAge: ageAggregate._avg.age || 0,
@@ -42,7 +36,6 @@ export async function GET() {
         name: p.hasHSITPlan ? "Has Plan" : "No Plan",
         value: p._count.hasHSITPlan,
       })),
-      averageMonthlySavingsNeeded: savingsAggregate._avg.monthlySavingsNeeded || 0
     });
   } catch (error) {
     console.error("Error fetching admin stats:", error);

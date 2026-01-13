@@ -57,11 +57,11 @@ function calculateFuturePremiums(
   const yearsTo75 = Math.max(0, 75 - currentAge)
   const ageFactor75 = getAgeFactor(75)
   const currentAgeFactor = getAgeFactor(currentAge)
-  
+
   // Apply age factor and compound inflation
-  const futurePremium = currentPremium * (ageFactor75 / currentAgeFactor) * 
+  const futurePremium = currentPremium * (ageFactor75 / currentAgeFactor) *
     Math.pow(1 + inflationRate, yearsTo75)
-  
+
   return futurePremium
 }
 
@@ -78,23 +78,23 @@ function calculateExpectedOOP(
 
   let totalOOP = 0
   const currentYear = new Date().getFullYear()
-  
+
   for (let age = currentAge; age <= 75; age++) {
     const utilization = getUtilizationFactor(age)
     const severity = getSeverityFactor(age)
-    
+
     // Expected claim amount based on utilization and severity
     const expectedClaim = utilization * severity * 5000 // Base claim amount of RM 5000
-    
+
     // Apply deductible and co-insurance
-    const oopForYear = Math.min(deductibleAmount, expectedClaim) + 
+    const oopForYear = Math.min(deductibleAmount, expectedClaim) +
       (expectedClaim - Math.min(deductibleAmount, expectedClaim)) * (coInsurancePercentage / 100)
-    
+
     // Apply claim inflation (5% per year)
     const yearsFromNow = age - currentAge
     totalOOP += oopForYear * Math.pow(1.05, yearsFromNow)
   }
-  
+
   return totalOOP
 }
 
@@ -106,41 +106,41 @@ function calculateProjectedSavings(
 ): number {
   let totalSavings = 0
   const yearsTo75 = Math.max(0, 75 - currentAge)
-  
+
   for (let year = 0; year <= yearsTo75; year++) {
     // Add yearly contribution and apply growth
     totalSavings = totalSavings * (1 + growthRate) + (monthlySavings * 12)
   }
-  
+
   return totalSavings
 }
 
 // Generate personalized guidance messages
 function generateGuidanceMessages(data: z.infer<typeof calculationSchema>): string[] {
   const messages: string[] = []
-  
+
   if (!data.hasHSITPlan) {
     messages.push("Without insurance, even a single hospital admission could cost several months of income. Building an emergency buffer or exploring affordable HSIT protection can help.")
   }
-  
+
   if (data.hasDeductible && (data.deductibleAmount! > 0 || data.coInsurancePercentage! > 0)) {
     messages.push("Plans with copayment features mean you share part of each hospital bill. Make sure you have accessible savings to cover this.")
   }
-  
+
   if (!data.criticalIllnessCover || data.criticalIllnessCover === 0) {
     messages.push("In the event of a critical illness, income loss can make sustaining current lifestyle and paying future premiums difficult. Consider whether a CI plan fits your needs.")
   }
-  
+
   if (data.age > 40) {
     messages.push("If you have dependents, consider additional HSIT or CI coverage, savings and emergency buffer to meet potential higher healthcare needs.")
   }
-  
+
   if (data.age > 50) {
     messages.push("You may need to save more or purchase HSIT plans earlier if you have higher health risks, such as pre-existing conditions, family history of chronic illnesses, or high-stress lifestyle.")
   }
-  
+
   messages.push("Consider your current savings and EPF balances to meet future healthcare expenditures.")
-  
+
   return messages
 }
 
@@ -148,13 +148,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const validatedData = calculationSchema.parse(body)
-    
+
     // Calculate future premiums
-    const lowInflationPremium = validatedData.currentMonthlyPremium ? 
+    const lowInflationPremium = validatedData.currentMonthlyPremium ?
       calculateFuturePremiums(validatedData.age, validatedData.currentMonthlyPremium, 0.05) : 0
-    const highInflationPremium = validatedData.currentMonthlyPremium ? 
+    const highInflationPremium = validatedData.currentMonthlyPremium ?
       calculateFuturePremiums(validatedData.age, validatedData.currentMonthlyPremium, 0.08) : 0
-    
+
     // Calculate expected OOP
     const expectedOOP = calculateExpectedOOP(
       validatedData.age,
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
       validatedData.deductibleAmount,
       validatedData.coInsurancePercentage
     )
-    
+
     // Calculate recommended savings
     // Base recommendation: 20% of future premium + OOP buffer
     const monthlySavingsNeeded = Math.max(
@@ -170,13 +170,13 @@ export async function POST(request: NextRequest) {
       100 // Minimum RM 100 per month
     )
     const yearlySavingsNeeded = monthlySavingsNeeded * 12
-    
+
     // Calculate projected savings
     const projectedSavings = calculateProjectedSavings(validatedData.age, monthlySavingsNeeded)
-    
+
     // Generate guidance messages
     const guidanceMessages = generateGuidanceMessages(validatedData)
-    
+
     // Save to database
     const savedInput = await db.hSITCalculatorInput.create({
       data: {
@@ -190,7 +190,7 @@ export async function POST(request: NextRequest) {
         criticalIllnessCover: validatedData.criticalIllnessCover,
       }
     })
-    
+
     await db.hSITCalculatorResult.create({
       data: {
         inputId: savedInput.id,
@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
         guidanceMessages: JSON.stringify(guidanceMessages),
       }
     })
-    
+
     const results = {
       monthlySavingsNeeded,
       yearlySavingsNeeded,
@@ -213,19 +213,19 @@ export async function POST(request: NextRequest) {
       projectedSavings,
       guidanceMessages,
     }
-    
+
     return NextResponse.json(results)
-    
+
   } catch (error) {
     console.error('Calculation error:', error)
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid input data', details: error.errors },
         { status: 400 }
       )
     }
-    
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
