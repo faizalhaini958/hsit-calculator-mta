@@ -3,10 +3,10 @@ import HSITCalculator from "@/components/hsit-calculator"
 
 export default function Home() {
   return (
-    <div className="py-8 md:py-16">
+    <div className="py-4 md:py-8">
       <div className="container mx-auto px-4">
         {/* Hero Section */}
-        <div className="flex flex-col items-center text-center space-y-6 mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
+        <div className="flex flex-col items-center text-center space-y-3 mb-4 animate-in fade-in slide-in-from-top-4 duration-1000">
           <Image
             src="/takaful4all-logo.png"
             alt="Takaful4All Logo"
