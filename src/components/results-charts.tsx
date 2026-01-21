@@ -47,32 +47,47 @@ export function ResultsChart({
 
   const chartData = generateChartData()
 
+  // Responsive configuration based on screen size
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+
   return (
     <Card className="glass-card premium-shadow overflow-hidden">
       <CardHeader className="bg-premium-gradient text-white">
-        <CardTitle className="text-lg">Premium Projection to Age 75</CardTitle>
+        <CardTitle className="text-base sm:text-lg">Premium Projection to Age 75</CardTitle>
       </CardHeader>
-      <CardContent className="pt-6">
-        <ResponsiveContainer width="100%" height={320}>
-          <LineChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 20 }}>
+      <CardContent className="pt-4 sm:pt-6 px-2 sm:px-6">
+        <ResponsiveContainer width="100%" height={isMobile ? 280 : 320}>
+          <LineChart
+            data={chartData}
+            margin={isMobile
+              ? { top: 5, right: 5, left: -15, bottom: 5 }
+              : { top: 10, right: 30, left: 20, bottom: 20 }
+            }
+          >
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
             <XAxis
               dataKey="age"
-              label={{ value: 'Age', position: 'insideBottom', offset: -10, fontStyle: 'italic' }}
-              tick={{ fontSize: 12, fill: '#64748b' }}
+              label={!isMobile ? { value: 'Age', position: 'insideBottom', offset: -10, fontStyle: 'italic' } : undefined}
+              tick={{ fontSize: isMobile ? 10 : 12, fill: '#64748b' }}
               axisLine={{ stroke: '#e2e8f0' }}
             />
             <YAxis
-              tickFormatter={(value) => value.toLocaleString()}
-              width={80}
-              label={{
+              tickFormatter={(value) => isMobile ? `${(value / 1000).toFixed(0)}k` : value.toLocaleString()}
+              width={isMobile ? 45 : 80}
+              label={!isMobile ? {
                 value: 'Monthly Premium (RM)',
                 angle: -90,
                 position: 'insideLeft',
                 offset: -10,
                 style: { textAnchor: 'middle', fill: '#64748b', fontSize: 13, fontWeight: 500 }
+              } : {
+                value: 'RM',
+                angle: -90,
+                position: 'insideLeft',
+                offset: 0,
+                style: { textAnchor: 'middle', fill: '#64748b', fontSize: 10, fontWeight: 500 }
               }}
-              tick={{ fontSize: 12, fill: '#64748b' }}
+              tick={{ fontSize: isMobile ? 9 : 12, fill: '#64748b' }}
               axisLine={{ stroke: '#e2e8f0' }}
             />
             <Tooltip
@@ -81,7 +96,8 @@ export function ResultsChart({
                 borderRadius: '12px',
                 border: '1px solid #e2e8f0',
                 boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                backdropFilter: 'blur(4px)'
+                backdropFilter: 'blur(4px)',
+                fontSize: isMobile ? '11px' : '14px'
               }}
               formatter={(value: number) => [`RM ${value.toLocaleString()}`, '']}
               labelFormatter={(label) => `Age ${label}`}
@@ -89,25 +105,26 @@ export function ResultsChart({
             />
             <Legend
               verticalAlign="top"
-              height={36}
-              wrapperStyle={{ paddingBottom: '20px' }}
+              height={isMobile ? 28 : 36}
+              wrapperStyle={{ paddingBottom: isMobile ? '10px' : '20px', fontSize: isMobile ? '11px' : '14px' }}
+              iconSize={isMobile ? 10 : 14}
             />
             <Line
               type="monotone"
               dataKey="lowInflation"
               stroke="oklch(0.55 0.15 200)"
-              strokeWidth={3}
-              dot={{ fill: 'oklch(0.55 0.15 200)', r: 4 }}
-              activeDot={{ r: 7, strokeWidth: 2, stroke: '#fff' }}
+              strokeWidth={isMobile ? 2 : 3}
+              dot={{ fill: 'oklch(0.55 0.15 200)', r: isMobile ? 3 : 4 }}
+              activeDot={{ r: isMobile ? 5 : 7, strokeWidth: 2, stroke: '#fff' }}
               name="Low Inflation (5%)"
             />
             <Line
               type="monotone"
               dataKey="highInflation"
               stroke="oklch(0.55 0.18 243)"
-              strokeWidth={3}
-              dot={{ fill: 'oklch(0.55 0.18 243)', r: 4 }}
-              activeDot={{ r: 7, strokeWidth: 2, stroke: '#fff' }}
+              strokeWidth={isMobile ? 2 : 3}
+              dot={{ fill: 'oklch(0.55 0.18 243)', r: isMobile ? 3 : 4 }}
+              activeDot={{ r: isMobile ? 5 : 7, strokeWidth: 2, stroke: '#fff' }}
               name="High Inflation (8%)"
             />
           </LineChart>
